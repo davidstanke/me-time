@@ -3,14 +3,38 @@ From Zero to Agent on Gemini Enterprise.
 
 ## 0. Prerequisites (for GCP project administrator)
 You will need a GCP project with the following services enabled:
-- [service]
-- [service]
+- `aiplatform.googleapis.com`
+- `artifactregistry.googleapis.com`
+- `bigquery.googleapis.com`
+- `cloudbuild.googleapis.com`
+- `cloudtrace.googleapis.com`
+- `discoveryengine.googleapis.com`
+- `iam.googleapis.com`
+- `logging.googleapis.com`
+- `monitoring.googleapis.com`
+- `run.googleapis.com`
+- `serviceusage.googleapis.com`
+- `storage.googleapis.com`
 
 And your GCP user needs to have the following IAM roles on the project:
-- [role]
-- [role]
+- `roles/aiplatform.user`
+- `roles/bigquery.admin`
+- `roles/cloudtrace.viewer`
+- `roles/discoveryengine.admin`
+- `roles/iam.serviceAccountUser`
 
-#### Services
+Additionally, the project administrator must create a dedicated runtime service account for the agent and grant it BigQuery job permissions:
+```bash
+# Replace PROJECT_ID with your GCP project ID
+gcloud iam service-accounts create me-time-agent \
+  --description="Runtime service account for Me Time agent" \
+  --display-name="Me Time Agent SA"
+
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:me-time-agent@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/bigquery.jobUser"
+```
+
 
 ## 1. Antigravity
 You'll need at least one Antigravity tool (Antigravity 2.0, Antigravity CLI, or Antigravity Extensions for IDE). Visit [antigravity.google](https://antigravity.google) to install. Then log in. (If using Antigravity as part of Gemini Enterprise, be sure to login using "Use business account" / "Continue with Google Cloud")
@@ -45,18 +69,25 @@ Use the following Antigravity prompt to confirm your GCP access:
 Check my permissions to ensure that I have the following roles on the current `gcloud` project:
   - `roles/discoveryengine.admin`
   - `roles/aiplatform.user`
+  - `roles/bigquery.admin`
+  - `roles/iam.serviceAccountUser`
+  - `roles/cloudtrace.viewer`
 
-If not, add them.
+If any are missing, report the missing roles so I can ask my GCP project administrator to grant them.
 
 Then, check the enabled APIs on the project; for each, if it is not enabled, enable it:
   - `aiplatform.googleapis.com`
+  - `artifactregistry.googleapis.com`
+  - `bigquery.googleapis.com`
+  - `cloudbuild.googleapis.com`
+  - `cloudtrace.googleapis.com`
   - `discoveryengine.googleapis.com`
   - `iam.googleapis.com`
-  - `artifactregistry.googleapis.com`
-  - `run.googleapis.com`
-  - `storage.googleapis.com`
   - `logging.googleapis.com`
   - `monitoring.googleapis.com`
+  - `run.googleapis.com`
+  - `serviceusage.googleapis.com`
+  - `storage.googleapis.com`
 ```
 
 ## 3. Let's agent!
@@ -119,7 +150,7 @@ Grant read access to the `events` table to the IAM principal that is currently a
 Start a `/grill-me` session, then paste the following prompt and answer the questions; review the implementation plan and revise as needed, then proceed.
 
 ```
-For the IAM principal that is currently authenticated on this machine via Application Default Credentials, grant the permission to query BigQuery using the BigQuery MCP server (https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp).
+Configure the BigQuery MCP server (https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp) using the current Application Default Credentials.
 
 Then modify the "work context agent": stop returning mock data, and instead return events from BigQuery.
 ```
@@ -143,7 +174,7 @@ _Open the agent on localhost and test it_
 ### 3.6 Deploy to Agent Runtime
 Start a `/goal` session and run the following prompt:
 ```
-Deploy `me-time` to Agent Runtime. Grant its identity access to use the BigQuery MCP server, and to read from the `events` table.
+Deploy `me-time` to Agent Runtime using the service account `me-time-agent@PROJECT_ID.iam.gserviceaccount.com`. Grant this service account read access to the `events` table in the `schedule` dataset.
 
 Then run test queries against it. If there are errors, fix them and redeploy. Repeat until it works. Use Cloud Logging information as needed.
 ```
