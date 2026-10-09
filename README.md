@@ -2,7 +2,15 @@
 From Zero to Agent on Gemini Enterprise.
 
 ## 0. Prerequisites (for GCP project administrator)
-[TODO: based on everything that follows, determine the minimal set of APIs and user permissions needed, then describe them here]
+You will need a GCP project with the following services enabled:
+- [service]
+- [service]
+
+And your GCP user needs to have the following IAM roles on the project:
+- [role]
+- [role]
+
+#### Services
 
 ## 1. Antigravity
 You'll need at least one Antigravity tool (Antigravity 2.0, Antigravity CLI, or Antigravity Extensions for IDE). Visit [antigravity.google](https://antigravity.google) to install. Then log in. (If using Antigravity as part of Gemini Enterprise, be sure to login using "Use business account" / "Continue with Google Cloud")
@@ -165,3 +173,11 @@ Register the `me-time` agent with the Gemini Enterprise app `<APP_ID>`
 ```
 Review the following trace data and recommend performance improvements: `<TRACE_DATA>`
 ```
+
+### 4.4 (Optional): make a web front-end
+Start a `/grill-me` session, then paste the following prompt and answer the questions; review the implementation plan and revise as needed, then proceed.
+```
+Make a front-end interface which uses the locally-running agent as its backend.
+```
+
+_Run the front-end locally and interact with it_
